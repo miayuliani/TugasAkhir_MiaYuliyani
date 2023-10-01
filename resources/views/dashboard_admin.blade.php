@@ -176,6 +176,7 @@
 			<a href="logout">
 				<button type="button" class="button4">Logout</button>
 			</a>
+          	<button type="button" class="button" id="sidebarBtn">List Wifi</button>
 		</div>
         <!-- </center> -->
       </div>
@@ -215,6 +216,19 @@
 		<input id="password" placeholder="Masukan Password Wifi" class="form-control" style="margin-right: 12px;">
 		<button onclick="save_data_to_api()" class="btn btn-warning" style="margin-right: 12px; margin-left: 12px;">Simpan Data Wifi</button>
 		<textarea id="geojson" class="form-control mt-3" style="margin-right: 12px; margin-left: 12px; height: 158px;" readonly></textarea>
+	</div>
+
+	<div class="template-list d-none">
+		<div class="nama d-flex align-items-center p-1">
+		<img src="fimaps.png" width="20" height="25"><span class="nama_wifi"></span>
+		</div>
+		<div class="alamat d-flex align-items-center p-1">
+		<img src="address.png" width="20" height="20"><span class="alamat_wifi"></span>
+		</div>
+		<div class="jarak d-flex align-items-center p-1">
+		<img src="distance.png" width="25" height="20"><span class="jarak_wifi"></span>
+		</div>
+		<hr class="featurette-divider">
 	</div>
 @endsection
 
@@ -529,6 +543,7 @@
 					alert(response);
 					clear_map();
 					get_data_from_api();
+					getList();
 					}
 				});
 				});
@@ -554,6 +569,7 @@
             	document.getElementById('password').value = res.password;
             	document.getElementById('geojson').value = res.geojson;
             });
+			getList();
           }
         });
       });
@@ -600,7 +616,8 @@
 				success: function(response) {
 					alert(response);
 					clear_map();
-					get_data_from_api()
+					get_data_from_api();
+					getList();
 				}
 				});
 			});
@@ -621,6 +638,53 @@
     reverseButtons: true,
   });
   }
+
+  function getList() {
+      $(function() {
+        $.ajax({
+          method: "post",
+          url: "data_admin/admin_get_data_all",
+		  data: {
+            "_token": "{{ csrf_token() }}"
+          },
+          success: function(response) {
+			$('#list-wifi').empty();
+            response.forEach((element) => {
+            //   console.log(element);
+              if (element.geometry) {
+                element.geometry = JSON.parse(element.geometry);
+                if (element.type == 'Point' && (element.geometry.coordinates[0] 
+				!= undefined && element.geometry.coordinates[0] != 'undefined') 
+				&& (element.geometry.coordinates[1] != undefined && element.geometry.coordinates[1] != 'undefined')) {
+                  var latitude = element.geometry.coordinates[1];
+                  var longitude = element.geometry.coordinates[0];
+
+				  var fromLatLng = L.latLng(currentCoordinate.latitude, currentCoordinate.longitude);
+				  var toLatLng = L.latLng(latitude, longitude);
+
+				  var dis = (fromLatLng.distanceTo(toLatLng)/1000).toFixed(1);
+				  
+
+					clone = $('.template-list').clone();
+
+					clone.find('.nama_wifi').html(element.nama);
+					clone.find('.alamat_wifi').html(element.alamat);
+					clone.find('.jarak_wifi').html(dis+ " Km");
+
+					clone.removeClass('template-list');
+					clone.removeClass('d-none');
+					clone.addClass('list');
+
+					$('#list-wifi').append(clone);
+
+                }
+              }
+            });
+          }
+        });
+      });
+      
+		}
 
 	</script>
 

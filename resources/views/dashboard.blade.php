@@ -110,6 +110,7 @@
 
 @section('content')
 
+
 <div id="sidebar" class="h-100 sidebar text-left p-3">
   <img src="close.png" width="15" height="15" id="closeSidebar"/> 
   {{-- <button class="btn btn-light" id="closeSidebar" style="background-color: transparent; border:none;">Tutup Daftar</button> --}}
@@ -127,6 +128,7 @@
           <button onclick="clearMap()" type="button" class="button" style="margin-right: 5px;">Bersihkan Peta</button>
         </div>
         <div class="text-end" style="margin-left: auto;">
+
           {{-- <a href="login"> --}}
           <button type="button" class="button" id="sidebarBtn" style="margin-right: 288px;">List Wifi</button>
           {{-- <a href="login">
@@ -155,7 +157,6 @@
     </div>
     <hr class="featurette-divider">
   </div>
-
 @endsection
 
 @section('body-script')
@@ -267,6 +268,7 @@
       .addTo(mymap)
     })
 
+
         //fungsi load list
         function getList(){
       $('#list-wifi').empty();
@@ -327,7 +329,7 @@
                             weight: 0.2,
                             })
                             .bindPopup("Menjangkau sekitar 2 Kilometer dari titik lokasi saat ini")
-                            .addTo(mymap);
+                            .addTo(mymap);                      
             }
         }
       });
