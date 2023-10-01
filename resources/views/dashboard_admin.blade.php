@@ -90,6 +90,16 @@
 			width: 100px;
 			height: 30px;
 		}
+
+		.sidebar{
+		width: 350px;
+		background-color: #ededed;
+		position: fixed!important;
+		z-index: 10000;
+		overflow: auto;
+		right: 0;
+		display: none;
+  		}
 	</style>
 
 @endsection
@@ -137,6 +147,14 @@
 @endsection
 
 @section('content')
+
+	<div id="sidebar" class="h-100 sidebar text-left p-3">
+	<img src="close.png" width="15" height="15" id="closeSidebar"/> 
+	{{-- <button class="btn btn-light" id="closeSidebar" style="background-color: transparent; border:none;">Tutup Daftar</button> --}}
+	<div id="list-wifi">
+	</div>
+  	</div>
+
   <header class="p-3 text-black" style="background-color: #EDEDED">
     <div class="container">
       <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
@@ -146,6 +164,14 @@
 			<button onclick="get_data_from_api()" type="button" class="button2" style="margin-right: 5px;">Semua Data Wifi</button>
 			<button onclick="clear_map()" type="button" class="button" style="margin-right: 40px;">Bersihkan Peta</button>
 		</div>
+		<div class="text-end" style="margin-left: auto;">
+			{{-- <a href="login"> --}}
+			<button type="button" class="button2" id="sidebarBtn" style="margin-right: 288px;">List Wifi</button>
+			{{-- <a href="login">
+			  <button href="login" type="button" class="button">Login</button>
+			</a>
+			</a> --}}
+		  </div>
 		<div class="text-end" style="margin-left: auto;">
 			<a href="logout">
 				<button type="button" class="button4">Logout</button>
@@ -157,6 +183,19 @@
   </header>
 
   <div id="mapid"></div>
+
+  <div class="template-list d-none">
+    <div class="nama d-flex align-items-center p-1">
+      <img src="fimaps.png" width="20" height="25"><span class="nama_wifi"></span>
+    </div>
+    {{-- <div class="alamat d-flex align-items-center p-1">
+      <img src="address.png" width="20" height="20"><span class="alamat_wifi"></span>
+    </div> --}}
+    <div class="jarak d-flex align-items-center p-1">
+      <img src="distance.png" width="25" height="20"><span class="jarak_wifi"></span>
+    </div>
+    <hr class="featurette-divider">
+  </div>
 
   <div class="input-group mb-3 mt-3 col-md-3">
 		<input type="hidden" id="id_wifi">
@@ -183,6 +222,13 @@
 <script>
 
     window.onload = (event) => {
+		$("#sidebarBtn").click(function () {
+        $("#sidebar").show();
+      });
+      $("#closeSidebar").click(function () {
+        $("#sidebar").hide();
+      });
+      getList();
       mymap.flyTo([-6.921377532857643, 107.61116941094397], 14);
       L.marker([-6.921377532857643, 107.61116941094397])
 	  .bindPopup('<center><img src="titik_0_bdg.jpg" width="250" height="200"></center>'+ 
@@ -380,7 +426,32 @@
       .addTo(mymap)
     })
 
+	//fungsi load list
+	function getList(){
+		$('#list-wifi').empty();
+		data.forEach(element => {
+			if (element.geojson) {
+			const geojson = JSON.parse(element.geojson)
+			if (geojson.type == 'Point') {
+				var latitude = geojson.coordinates[1];
+				var longitude = geojson.coordinates[0];
+				var fromLatLng = L.latLng(currentCoordinate.latitude, currentCoordinate.longitude);
+				var toLatLng = L.latLng(latitude, longitude);
+				var dis = (fromLatLng.distanceTo(toLatLng)/1000).toFixed(1);
+				clone = $('.template-list').clone();
+				clone.find('.nama_wifi').html(element.nama);
+				// clone.find('.alamat_wifi').html(element.alamat);
+				clone.find('.jarak_wifi').html(dis+ " Km");
+				clone.removeClass('template-list');
+				clone.removeClass('d-none');
+				clone.addClass('list');
+				$('#list-wifi').append(clone);
+			}
+			}
+		});
+		}
 
+		//fungsi load wifi
 		var marker_from_api;
 		function get_data_from_api() {
       $(function() {
